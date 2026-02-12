@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Giỏ hàng của bạn</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'book_home' %}">📚 Nhà sách</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{% url 'customer_profile' %}">Xin chào, {{ user.username }}</a>
+                <a class="nav-link" href="{% url 'customer_logout' %}">Đăng xuất</a>
+                <a class="nav-link" href="{% url 'order_history' %}">Lịch sử đơn hàng</a>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container mt-3">
+        <h2 class="mb-4">🛒 Giỏ hàng của bạn</h2>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% if items %}
+        <table class="table table-bordered">
+            <thead class="table-light">
+                <tr>
+                    <th>Sản phẩm</th>
+                    <th>Đơn giá</th>
+                    <th>Số lượng</th>
+                    <th>Thành tiền</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>
+                        <strong>{{ item.book.title }}</strong><br>
+                        <small class="text-muted">Tác giả: {{ item.book.author }}</small>
+                    </td>
+                    <td>{{ item.book.price|floatformat:0 }} đ</td>
+                    <td>
+                        <form method="POST" action="{% url 'update_cart_item' item.id %}" class="d-inline">
+                            {% csrf_token %}
+                            <div class="input-group" style="width: 120px;">
+                                <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.book.stock_quantity }}" class="form-control form-control-sm">
+                                <button type="submit" class="btn btn-sm btn-outline-primary">Cập nhật</button>
+                            </div>
+                        </form>
+                        <small class="text-muted d-block mt-1">Còn: {{ item.book.stock_quantity }} cuốn</small>
+                    </td>
+                    <td><strong>{% widthratio item.book.price 1 item.quantity %} đ</strong></td>
+                    <td>
+                        <form method="POST" action="{% url 'remove_from_cart' item.id %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc muốn xóa?')">Xóa</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <div class="d-flex justify-content-end mb-4">
+            <div class="card" style="width: 300px;">
+                <div class="card-body">
+                    <h5 class="card-title">Tổng cộng</h5>
+                    <h3 class="text-danger">{{ total|floatformat:0 }} VNĐ</h3>
+                </div>
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-between mt-4">
+            <a href="{% url 'book_home' %}" class="btn btn-secondary">← Tiếp tục mua sắm</a>
+            <a href="{% url 'checkout' %}" class="btn btn-success btn-lg">Tiến hành Thanh toán →</a>
+        </div>
+        {% else %}
+        <div class="alert alert-info text-center">
+            <h4>Giỏ hàng trống!</h4>
+            <p>Hãy thêm sách vào giỏ hàng để tiếp tục mua sắm.</p>
+            <a href="{% url 'book_home' %}" class="btn btn-primary">Mua sắm ngay</a>
+        </div>
+        {% endif %}
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

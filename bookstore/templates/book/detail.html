@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ book.title }} - Chi tiết</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'book_home' %}">📚 Nhà sách</a>
+            <div class="navbar-nav ms-auto">
+                {% if user.is_authenticated %}
+                    <a class="nav-link" href="{% url 'customer_profile' %}">Xin chào, {{ user.username }}</a>
+                    <a class="nav-link" href="{% url 'customer_logout' %}">Đăng xuất</a>
+                    <a class="nav-link" href="{% url 'view_cart' %}">🛒 Giỏ hàng</a>
+                {% else %}
+                    <a class="nav-link" href="{% url 'customer_login' %}">Đăng nhập</a>
+                    <a class="nav-link" href="{% url 'customer_register' %}">Đăng ký</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container mt-3">
+        <a href="{% url 'book_home' %}" class="btn btn-outline-secondary mb-3">&larr; Quay lại</a>
+        
+        <div class="row">
+            <div class="col-md-4">
+                {% if book.image_url %}
+                <img src="{{ book.image_url }}" class="img-fluid rounded shadow" alt="{{ book.title }}">
+                {% else %}
+                <div class="bg-secondary text-white d-flex justify-content-center align-items-center" style="height: 400px;">No Image</div>
+                {% endif %}
+            </div>
+            
+            <div class="col-md-8">
+                <h1 class="display-5">{{ book.title }}</h1>
+                <h4 class="text-muted">Tác giả: {{ book.author }}</h4>
+                <h3 class="text-danger mt-3 fw-bold">{{ book.price }} VNĐ</h3>
+                
+                <hr>
+                <p><strong>Danh mục:</strong> {% if book.category %}{{ book.category.name }}{% else %}Chưa phân loại{% endif %}</p>
+                <p><strong>Tồn kho:</strong> {{ book.stock_quantity }} cuốn</p>
+                
+                <div class="mt-4">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'add_to_cart' book.id %}" class="btn btn-primary btn-lg px-5">Thêm vào giỏ hàng</a>
+                    {% else %}
+                        <a href="{% url 'customer_login' %}" class="btn btn-primary btn-lg px-5">Đăng nhập để mua</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Gợi ý sách tương tự -->
+        {% if recommended_books %}
+        <hr class="my-5">
+        <h3 class="mb-4">📖 Sách gợi ý cho bạn</h3>
+        <div class="row">
+            {% for rec_book in recommended_books %}
+            <div class="col-md-3 mb-4">
+                <div class="card h-100">
+                    {% if rec_book.image_url %}
+                    <img src="{{ rec_book.image_url }}" class="card-img-top" alt="{{ rec_book.title }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                    <div class="bg-secondary text-white d-flex justify-content-center align-items-center" style="height: 200px;">
+                        No Image
+                    </div>
+                    {% endif %}
+                    
+                    <div class="card-body">
+                        <h6 class="card-title">{{ rec_book.title }}</h6>
+                        <p class="card-text text-danger fw-bold">{{ rec_book.price }} VNĐ</p>
+                        <p class="text-muted small">Tác giả: {{ rec_book.author }}</p>
+                    </div>
+                    <div class="card-footer bg-white border-top-0">
+                        <a href="{% url 'book_detail' rec_book.id %}" class="btn btn-sm btn-primary w-100">Xem chi tiết</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
